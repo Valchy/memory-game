@@ -10,7 +10,8 @@ export default function Layout({ children }: LayoutProps) {
 	return (
 		<div className="flex flex-col items-center">
 			<Header />
-			<AnimatePresence exitBeforeEnter>{children}</AnimatePresence>
+			{/* <AnimatePresence exitBeforeEnter>{children}</AnimatePresence> */}
+			{children}
 		</div>
 	);
 }

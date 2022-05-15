@@ -1,14 +1,10 @@
 import { createMachine, assign } from 'xstate';
-
-type Tile = {
-	guessed: boolean;
-	index: number;
-};
+import type { TileType } from '@mytypes';
 
 interface Context {
 	game_time: number;
 	guesses: number;
-	tiles: Tile[];
+	tiles: TileType[];
 	tiles_left: number;
 	chosen_tile: number | null;
 	compare_tile: number | null;
