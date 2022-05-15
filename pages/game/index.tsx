@@ -1,7 +1,7 @@
 import type { GetStaticProps } from 'next';
 import { memo, useCallback, useEffect, useState } from 'react';
 import { useMachine } from '@xstate/react';
-import memoryGameMachine from 'src/xstate/memoryGameMachine';
+import memoryGameMachine from 'src/machines/memoryGameMachine';
 import { gql } from '@apollo/client';
 import client from '@utils/graphql/client';
 import Layout from '@components/Layout';
@@ -31,10 +31,8 @@ const Game = () => {
 	const [tiles, setTiles] = useState<TileType[]>(tempTiles);
 
 	const toggleTile = useCallback((index: number): void => {
-		setTiles((tiles) => {
-			tiles[index] = { ...tiles[index], active: true };
-			return [...tiles];
-		});
+		tiles[index] = { ...tiles[index], active: !tiles[index].active };
+		setTiles([...tiles]);
 	}, []);
 
 	return (
@@ -63,20 +61,20 @@ const Tile = memo(({ index, tile, toggleTile }: TileProps) => {
 
 	const animations = {
 		spin: {
-			rotate: '36deg',
+			rotate: 360,
 		},
 		close: {
-			rotate: '0deg',
+			rotate: 0,
 		},
 	};
 
 	return (
 		<motion.div
 			variants={animations}
-			animate={tile.active ? { rotate: '36deg' } : { rotate: '0deg' }}
+			animate={tile.active ? 'spin' : 'close'}
 			transition={{ duration: 0.5 }}
 			onClick={() => toggleTile(index)}
-			className="m-1 flex cursor-pointer select-none items-center justify-center bg-[#181818] p-6 text-6xl text-[#404040]"
+			className="m-2 flex h-24 w-24 cursor-pointer select-none items-center justify-center rounded bg-[#181818] p-6 text-6xl font-bold text-[#404040]"
 		>
 			?
 		</motion.div>
