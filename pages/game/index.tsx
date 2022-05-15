@@ -1,11 +1,11 @@
 import type { GetStaticProps } from 'next';
-import { memo, useCallback, useEffect, useState } from 'react';
+import { memo, useCallback, useEffect } from 'react';
 import { useMachine } from '@xstate/react';
 import memoryGameMachine from 'src/machines/memoryGameMachine';
 import { gql } from '@apollo/client';
 import client from '@utils/graphql/client';
 import Layout from '@components/Layout';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import type { TileType } from '@mytypes';
 
 const gameMode = {
@@ -20,20 +20,31 @@ const Game = () => {
 	const [game, send] = useMachine(memoryGameMachine);
 
 	useEffect(() => {
-		// (() => send('START_GAME'))();
+		(() =>
+			send({
+				type: 'START_GAME',
+				tiles: [
+					{ guessed: false, active: false },
+					{ guessed: false, active: false },
+					{ guessed: false, active: false },
+					{ guessed: false, active: false },
+					{ guessed: false, active: false },
+					{ guessed: false, active: false },
+					{ guessed: false, active: false },
+					{ guessed: false, active: false },
+					{ guessed: false, active: false },
+					{ guessed: false, active: false },
+					{ guessed: false, active: false },
+					{ guessed: false, active: false },
+					{ guessed: false, active: false },
+					{ guessed: false, active: false },
+					{ guessed: false, active: false },
+					{ guessed: false, active: false },
+				],
+			}))();
 	}, [send]);
 
-	let tempTiles: TileType[] = [];
-	for (let i = 1; i <= gameMode.tiles; i++) {
-		tempTiles.push({ guessed: false, active: false, index: 1 });
-	}
-
-	const [tiles, setTiles] = useState<TileType[]>(tempTiles);
-
-	const toggleTile = useCallback((index: number): void => {
-		tiles[index] = { ...tiles[index], active: !tiles[index].active };
-		setTiles([...tiles]);
-	}, []);
+	const toggleTile = useCallback((index: number) => send({ type: 'TOGGLE_TILE', index }), []);
 
 	return (
 		<Layout key="game">
@@ -42,8 +53,8 @@ const Game = () => {
 			<span>Game Time: {game.context.game_time}</span>
 
 			<div className="grid grid-cols-4">
-				{tiles.map((elm, index) => (
-					<Tile tile={tiles[index]} toggleTile={toggleTile} index={index} key={`memory-game-tile-${index}`} />
+				{game.context.tiles.map((tile, index) => (
+					<Tile tile={tile} toggleTile={toggleTile} index={index} key={`memory-game-tile-${index}`} />
 				))}
 			</div>
 		</Layout>
@@ -66,6 +77,8 @@ const Tile = memo(({ index, tile, toggleTile }: TileProps) => {
 		close: {
 			rotate: 0,
 		},
+		show: { opacity: 1 },
+		hide: { opacity: 0 },
 	};
 
 	return (
@@ -76,7 +89,18 @@ const Tile = memo(({ index, tile, toggleTile }: TileProps) => {
 			onClick={() => toggleTile(index)}
 			className="m-2 flex h-24 w-24 cursor-pointer select-none items-center justify-center rounded bg-[#181818] p-6 text-6xl font-bold text-[#404040]"
 		>
-			?
+			<AnimatePresence>
+				{tile.active && (
+					<motion.div variants={animations} animate="show" exit="hide">
+						{index}
+					</motion.div>
+				)}
+				{tile.active || (
+					<motion.div variants={animations} animate="show" exit="hide">
+						?
+					</motion.div>
+				)}
+			</AnimatePresence>
 		</motion.div>
 	);
 });

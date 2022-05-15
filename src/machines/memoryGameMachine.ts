@@ -54,6 +54,18 @@ const memoryGameMachine = createMachine<Context>(
 							actions: 'DO_GUESS',
 						},
 					],
+					TOGGLE_TILE: {
+						actions: assign({
+							tiles: (context, event) => {
+								let shallowCopyContext = [...context.tiles];
+								shallowCopyContext[event.index] = {
+									...shallowCopyContext[event.index],
+									active: !shallowCopyContext[event.index].active,
+								};
+								return shallowCopyContext;
+							},
+						}),
+					},
 					INC_GAME_TIME: {
 						actions: assign({
 							game_time: (context) => context.game_time + 1,
