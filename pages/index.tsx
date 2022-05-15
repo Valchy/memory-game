@@ -1,36 +1,43 @@
-import type { NextPage } from 'next';
-import Layout from '../src/components/Layout';
+import type { NextPage, GetStaticProps } from 'next';
+import { gql } from '@apollo/client';
+import client from '@utils/graphql/client';
+import Layout from '@components/Layout';
 import { motion } from 'framer-motion';
 import Link from 'next/link';
 
-const gameModes = [
-	{
-		label: 'beginner freindly',
-		level: 'easy',
-		tiles: 16,
-	},
-	{
-		label: 'a good challenge',
-		level: 'medium',
-		titles: 25,
-	},
-	{
-		label: 'experts only',
-		level: 'hard',
-		tiles: 36,
-	},
-];
-
-const Home: NextPage = () => {
+const Home: NextPage = ({ gameModes }) => {
 	return (
 		<Layout key="menu">
 			<motion.h1 exit={{ opacity: 0 }}>Please choose a game mode</motion.h1>
 
-			{gameModes.map(({ label, level }) => (
-				<Link href={`/game/${level}`}>{label}</Link>
+			{gameModes.map(({ label, level, id }) => (
+				<Link href={`/game`} key={id}>
+					<a className="mb-2">{label}</a>
+				</Link>
 			))}
 		</Layout>
 	);
+};
+
+export const getStaticProps: GetStaticProps = async (context) => {
+	const { data } = await client.query({
+		query: gql`
+			query {
+				gameModes {
+					id
+					label
+					level
+					tiles
+				}
+			}
+		`,
+	});
+
+	return {
+		props: {
+			gameModes: data.gameModes,
+		},
+	};
 };
 
 export default Home;
