@@ -1,4 +1,4 @@
-import type { NextPage, GetStaticProps } from 'next';
+import type { GetStaticProps } from 'next';
 import { memo } from 'react';
 import { gql } from '@apollo/client';
 import client from '@utils/graphql/client';
@@ -13,7 +13,7 @@ const gameMode = {
 	id: 1,
 };
 
-const Game: NextPage = () => {
+const Game = () => {
 	return (
 		<Layout key="game">
 			<motion.h1 exit={{ opacity: 0 }}>Game mode: {gameMode.level}</motion.h1>

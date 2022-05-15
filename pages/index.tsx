@@ -1,11 +1,21 @@
-import type { NextPage, GetStaticProps } from 'next';
+import type { GetStaticProps } from 'next';
 import { gql } from '@apollo/client';
 import client from '@utils/graphql/client';
 import Layout from '@components/Layout';
 import { motion } from 'framer-motion';
 import Link from 'next/link';
 
-const Home: NextPage = ({ gameModes }) => {
+type GameMode = {
+	id: string;
+	label: string;
+	level: string;
+	tiles: number;
+};
+interface GameMenuProps {
+	gameModes: [GameMode];
+}
+
+const GameMenu = ({ gameModes }: GameMenuProps) => {
 	return (
 		<Layout key="menu">
 			<motion.h1 exit={{ opacity: 0 }}>Please choose a game mode</motion.h1>
@@ -40,4 +50,4 @@ export const getStaticProps: GetStaticProps = async (context) => {
 	};
 };
 
-export default Home;
+export default GameMenu;
