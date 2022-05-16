@@ -1,38 +1,21 @@
 import { ApolloServerPluginLandingPageGraphQLPlayground } from 'apollo-server-core';
 import type { NextApiRequest, NextApiResponse } from 'next';
 import { gql, ApolloServer } from 'apollo-server-micro';
-import gameModes from './game_modes';
 
 const typeDefs = gql`
-	type GameMode {
-		level: String
-		label: String
-		tiles: Int
-		id: ID
-	}
-
-	type Query {
-		gameModes: [GameMode]
-		gameMode(id: ID!): GameMode
-	}
-
 	type GameStats {
 		gamesPlayed: Int
 	}
 
-	type Subscription {
+	type Query {
 		gameStats: GameStats
 	}
 `;
 
 const resolvers = {
 	Query: {
-		gameModes: () => {
-			return gameModes;
-		},
-		gameMode: (chosenId: number) => {
-			console.log(chosenId);
-			return gameModes.find(({ id }) => id === chosenId);
+		gameStats: () => {
+			return 1;
 		},
 	},
 };

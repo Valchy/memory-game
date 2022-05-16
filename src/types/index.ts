@@ -11,6 +11,7 @@ export type GameMode = {
 	label: string;
 	difficulty: string;
 	tiles: number;
+	columns: number;
 };
 
 export interface Context {

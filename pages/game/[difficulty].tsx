@@ -6,21 +6,17 @@ import { gql } from '@apollo/client';
 import client from '@utils/graphql/client';
 import Layout from '@components/Layout';
 import { motion, AnimatePresence } from 'framer-motion';
-import type { TileType, TileProps } from '@mytypes';
 import Buttons from '@components/Buttons';
 import Stats from '@components/Stats';
 import useWindowSize from 'react-use/lib/useWindowSize';
 import Confetti from 'react-confetti';
+import type { TileType, TileProps, GameMode } from '@mytypes';
 
-const gameMode = {
-	label: 'beginner freindly',
-	difficulty: 'easy',
-	tiles: 2,
-	columns: 1,
-	id: 1,
-};
+interface GameProps {
+	gameMode: GameMode;
+}
 
-const Game = () => {
+const Game = ({ gameMode }: GameProps) => {
 	const [game, send] = useMachine(memoryGameMachine);
 	const { width, height } = useWindowSize();
 	const [gameOver, setGameOver] = useState(false);
@@ -28,7 +24,7 @@ const Game = () => {
 
 	// Game shuffle logic
 	const shuffleGameTiles = (): TileType[] => {
-		return Array.from({ length: gameMode.tiles }, (elm, index) => ({
+		return Array.from({ length: gameMode?.tiles }, (elm, index) => ({
 			value: Math.floor(index / 2),
 			guessed: false,
 			active: false,
@@ -71,7 +67,7 @@ const Game = () => {
 				style={{ marginBottom: gameOver ? 48 : 16 }}
 				className="flex flex-col text-center"
 			>
-				<motion.span>mode: {gameMode.difficulty}</motion.span>
+				<motion.span>mode: {gameMode?.difficulty}</motion.span>
 			</motion.div>
 
 			{game.matches('game_over') && gameOver ? (
@@ -89,14 +85,14 @@ const Game = () => {
 					]}
 				/>
 			) : (
-				<div className="mt-3 grid" style={{ gridTemplateColumns: `repeat(${gameMode.columns}, minmax(0, 1fr)` }}>
+				<div className="mt-3 grid" style={{ gridTemplateColumns: `repeat(${gameMode?.columns}, minmax(0, 1fr)` }}>
 					{game.context.tiles.map((tile, index) => (
 						<Tile tile={tile} index={index} toggleTile={toggleTile} key={`memory-game-tile-${index}`} />
 					))}
 				</div>
 			)}
 
-			<Stats context={game.context} tiles={gameMode.tiles} />
+			<Stats context={game.context} tiles={gameMode?.tiles} />
 		</Layout>
 	);
 };
@@ -139,29 +135,38 @@ const Tile = memo(({ tile, index, toggleTile }: TileProps) => {
 });
 
 export const getStaticPaths: GetStaticPaths = async () => {
+	const { data } = await client.query({
+		query: gql`
+			query {
+				gameModes {
+					difficulty
+				}
+			}
+		`,
+	});
+
 	return {
-		paths: ['easy', 'medium', 'hard'].map((difficulty) => ({ params: { difficulty } })),
+		paths: data.gameModes.map(({ difficulty }: { difficulty: number }) => ({ params: { difficulty } })),
 		fallback: true,
 	};
 };
 
-export const getStaticProps: GetStaticProps = async () => {
-	// const { data } = await client.query({
-	// 	query: gql`
-	// 		query {
-	// 			gameModes {
-	// 				id
-	// 				label
-	// 				difficulty
-	// 				tiles
-	// 			}
-	// 		}
-	// 	`,
-	// });
+export const getStaticProps: GetStaticProps = async ({ params }) => {
+	const { data } = await client.query({
+		query: gql`
+			query {
+				gameModes(where: { difficulty: "${params?.difficulty}" }) {
+					columns
+					difficulty
+					tiles
+				}
+			}
+		`,
+	});
 
 	return {
 		props: {
-			gameModes: ['easy', 'medium', 'hard'],
+			gameMode: data.gameModes[0],
 		},
 	};
 };
