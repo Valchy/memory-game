@@ -1,5 +1,7 @@
 import { createMachine, assign } from 'xstate';
-import type { Context, CorrectGuessType } from '@mytypes';
+import type { Context, FIX_ME_PLS } from '@mytypes';
+
+const isActive = (context: Context, event: FIX_ME_PLS) => context.tiles[event.index].active || context.tiles[event.index].guessed;
 
 const memoryGameMachine = createMachine<Context>(
 	{
@@ -10,8 +12,9 @@ const memoryGameMachine = createMachine<Context>(
 			guesses: 0,
 			tiles: [],
 			pairs_left: 0,
-			chosen_tile: null,
-			compare_tile: null,
+			first_selected_tile: null,
+			second_selected_tile: null,
+			is_first_pick: true,
 		},
 		states: {
 			idle: {
@@ -34,6 +37,8 @@ const memoryGameMachine = createMachine<Context>(
 					TOGGLE_TILE: {
 						actions: assign({
 							tiles: (context, event) => {
+								if (isActive(context, event)) return context.tiles;
+
 								let shallowCopyContext = [...context.tiles];
 
 								shallowCopyContext[event.index] = {
@@ -43,12 +48,24 @@ const memoryGameMachine = createMachine<Context>(
 
 								return shallowCopyContext;
 							},
+							first_selected_tile: (context, event) => {
+								if (isActive(context, event) || !context.is_first_pick) return context.first_selected_tile;
+
+								return event.index;
+							},
+							second_selected_tile: (context, event) => {
+								if (isActive(context, event) || context.is_first_pick || context.first_selected_tile === event.index)
+									return context.second_selected_tile;
+
+								return event.index;
+							},
+							is_first_pick: (context) => !context.is_first_pick,
 						}),
 					},
 					GUESS: [
 						{
 							cond: {
-								type: 'correctGuess',
+								type: 'shouldGuess',
 								checkForMatch: true,
 								checkForLastPair: true,
 							},
@@ -57,7 +74,7 @@ const memoryGameMachine = createMachine<Context>(
 						},
 						{
 							cond: {
-								type: 'correctGuess',
+								type: 'shouldGuess',
 								checkForMatch: true,
 								checkForLastPair: false,
 							},
@@ -65,7 +82,7 @@ const memoryGameMachine = createMachine<Context>(
 						},
 						{
 							cond: {
-								type: 'correctGuess',
+								type: 'shouldGuess',
 								checkForMatch: false,
 								checkForLastPair: false,
 							},
@@ -98,12 +115,48 @@ const memoryGameMachine = createMachine<Context>(
 				pairs_left: (context) => 0,
 			}),
 			DO_GUESS: assign({
-				chosen_tile: (context) => null,
-				compare_tile: (context) => null,
+				first_selected_tile: (context) => null,
+				second_selected_tile: (context) => null,
 				guesses: (context) => context.guesses + 1,
+				tiles: (context, event) => {
+					if (context.first_selected_tile === null || context.second_selected_tile === null) return context.tiles;
+					let shallowCopyContext = [...context.tiles];
+
+					// Remove chosen tile active state
+					shallowCopyContext[context.first_selected_tile] = {
+						...shallowCopyContext[context.first_selected_tile],
+						active: false,
+					};
+
+					// Remove compare tile active state
+					shallowCopyContext[context.second_selected_tile] = {
+						...shallowCopyContext[context.second_selected_tile],
+						active: false,
+					};
+
+					return shallowCopyContext;
+				},
 			}),
 			CORRECT_GUESS: assign({
 				pairs_left: (context) => context.pairs_left - 1,
+				tiles: (context, event) => {
+					if (context.first_selected_tile === null || context.second_selected_tile === null) return context.tiles;
+					let shallowCopyContext = [...context.tiles];
+
+					// Make chosen tile to guessed state
+					shallowCopyContext[context.first_selected_tile] = {
+						...shallowCopyContext[context.first_selected_tile],
+						guessed: !shallowCopyContext[context.first_selected_tile].guessed,
+					};
+
+					// Make compare tile to guessed state
+					shallowCopyContext[context.second_selected_tile] = {
+						...shallowCopyContext[context.second_selected_tile],
+						guessed: !shallowCopyContext[context.second_selected_tile].guessed,
+					};
+
+					return shallowCopyContext;
+				},
 			}),
 			LOAD_GAME: assign({
 				tiles: (context, event) => event.tiles,
@@ -111,12 +164,20 @@ const memoryGameMachine = createMachine<Context>(
 			}),
 		},
 		guards: {
-			correctGuess: (context, event, { cond }: CorrectGuessType): boolean => {
-				console.log(context.chosen_tile, context.compare_tile);
-				if (cond.checkForMatch && context.chosen_tile != context.compare_tile) return false;
+			shouldGuess: (context, event, { cond }: FIX_ME_PLS): boolean => {
+				// Make sure both tiles have an index in them
+				if (context.first_selected_tile === null || context.second_selected_tile === null) return false;
+
+				// Get tile values for comparison
+				let firstTileVal = context.tiles[context.first_selected_tile];
+				let secondTileVal = context.tiles[context.second_selected_tile];
+
+				// Error handling for game end and correct guess
+				if (cond.checkForMatch && firstTileVal != secondTileVal) return false;
 				if (cond.checkForLastPair && context.pairs_left != 1) return false;
 
-				return context.chosen_tile !== null && context.compare_tile !== null && context.chosen_tile === context.compare_tile;
+				console.log('Guess allowed', cond.checkForMatch, context);
+				return true;
 			},
 		},
 	}

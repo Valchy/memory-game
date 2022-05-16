@@ -19,18 +19,7 @@ const gameMode = {
 };
 
 const Game = () => {
-	const [game, send] = useMachine(memoryGameMachine, {
-		// chosen_tile: (context, event) => {
-		// 	// if (context.tiles[event.index].active || context.tiles[event.index].guessed) return context.chosen_tile;
-		// 	console.log(context.chosen_tile === null && context.chosen_tile !== event.index);
-		// 	if (context.chosen_tile === null && context.chosen_tile !== event.index) return event.index;
-		// 	else return context.chosen_tile;
-		// },
-		// compare_tile: (context, event) => {
-		// 	if (context.compare_tile === null && context.compare_tile !== event.index) return event.index;
-		// 	else return context.compare_tile;
-		// },
-	});
+	const [game, send] = useMachine(memoryGameMachine);
 
 	useEffect(() => {
 		(() => {
@@ -44,9 +33,9 @@ const Game = () => {
 		})();
 	}, [send]);
 
-	const toggleTile = useCallback((index: number) => {
+	const toggleTile = useCallback((index: number): void => {
 		send({ type: 'TOGGLE_TILE', index });
-		send({ type: 'GUESS', index });
+		setTimeout(() => send({ type: 'GUESS' }), 1500);
 	}, []);
 
 	return (
@@ -55,10 +44,12 @@ const Game = () => {
 				animate={{ opacity: 1 }}
 				exit={{ opacity: 0 }}
 				style={{ marginBottom: game.matches('game_over') ? 48 : 16 }}
-				className="flex flex-col"
+				className="flex flex-col text-center"
 			>
 				<motion.span>mode: {gameMode.difficulty}</motion.span>
-				<motion.span>mode: {gameMode.difficulty}</motion.span>
+				<motion.span>
+					pairs left: {game.context.pairs_left} / {gameMode.tiles / 2}
+				</motion.span>
 			</motion.div>
 
 			{game.matches('game_over') ? (
@@ -88,8 +79,6 @@ interface TileProps {
 }
 
 const Tile = memo(({ tile, index, toggleTile }: TileProps) => {
-	console.log('rendered: ', tile.active);
-
 	const animations = {
 		spin: {
 			rotate: 360,

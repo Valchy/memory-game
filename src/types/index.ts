@@ -1,3 +1,5 @@
+export type FIX_ME_PLS = any;
+
 export type TileType = {
 	guessed: boolean;
 	active: boolean;
@@ -16,13 +18,7 @@ export interface Context {
 	guesses: number;
 	tiles: TileType[];
 	pairs_left: number;
-	chosen_tile: number | null;
-	compare_tile: number | null;
+	first_selected_tile: number | null;
+	second_selected_tile: number | null;
+	is_first_pick: boolean;
 }
-
-export type CorrectGuessType = {
-	cond: {
-		checkForMatch: boolean;
-		checkForLastPair: boolean;
-	};
-};
