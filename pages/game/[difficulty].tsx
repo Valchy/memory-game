@@ -1,5 +1,5 @@
 import type { GetStaticPaths, GetStaticProps } from 'next';
-import { memo, useCallback, useEffect } from 'react';
+import { memo, useCallback, useEffect, useState } from 'react';
 import { useMachine } from '@xstate/react';
 import memoryGameMachine from 'src/machines/memoryGameMachine';
 import { gql } from '@apollo/client';
@@ -9,17 +9,24 @@ import { motion, AnimatePresence } from 'framer-motion';
 import type { TileType, TileProps } from '@mytypes';
 import Buttons from '@components/Buttons';
 import Stats from '@components/Stats';
+import useWindowSize from 'react-use/lib/useWindowSize';
+import Confetti from 'react-confetti';
 
 const gameMode = {
 	label: 'beginner freindly',
 	difficulty: 'easy',
-	tiles: 4,
-	columns: 2,
+	tiles: 2,
+	columns: 1,
 	id: 1,
 };
 
 const Game = () => {
 	const [game, send] = useMachine(memoryGameMachine);
+	const { width, height } = useWindowSize();
+	const [gameOver, setGameOver] = useState(false);
+	const [showConfetti, setShowConfetti] = useState(false);
+
+	// Game shuffle logic
 	const shuffleGameTiles = (): TileType[] => {
 		return Array.from({ length: gameMode.tiles }, (elm, index) => ({
 			value: Math.floor(index / 2),
@@ -27,6 +34,17 @@ const Game = () => {
 			active: false,
 		})).sort(() => Math.random() - 0.5);
 	};
+
+	useEffect(() => {
+		console.log(game.value);
+		if (game.value === 'game_over') {
+			setShowConfetti(true);
+			setTimeout(() => {
+				setGameOver(true);
+				setShowConfetti(false);
+			}, 2000);
+		}
+	}, [game.value]);
 
 	useEffect(() => {
 		(() => {
@@ -40,24 +58,35 @@ const Game = () => {
 	}, []);
 
 	return (
-		<Layout key="game">
+		<Layout>
+			<AnimatePresence exitBeforeEnter>
+				{showConfetti && (
+					<motion.div initial={{ opacity: 1 }} exit={{ opacity: 0 }}>
+						<Confetti width={width - 25} height={height - 25} style={{ marginLeft: '12.5px' }} />
+					</motion.div>
+				)}
+			</AnimatePresence>
 			<motion.div
 				animate={{ opacity: 1 }}
 				exit={{ opacity: 0 }}
-				style={{ marginBottom: game.matches('game_over') ? 48 : 16 }}
+				style={{ marginBottom: gameOver ? 48 : 16 }}
 				className="flex flex-col text-center"
 			>
 				<motion.span>mode: {gameMode.difficulty}</motion.span>
-				<motion.span>
-					pairs left: {game.context.pairs_left} / {gameMode.tiles / 2}
-				</motion.span>
 			</motion.div>
 
-			{game.matches('game_over') ? (
+			{game.matches('game_over') && gameOver ? (
 				<Buttons
 					arr={[
 						{ href: '/', text: 'Change difficulty' },
-						{ href: '#', text: 'Play again', event: () => send({ type: 'PLAY_AGAIN', tiles: shuffleGameTiles() }) },
+						{
+							href: '#',
+							text: 'Play again',
+							event: () => {
+								setGameOver(false);
+								send({ type: 'PLAY_AGAIN', tiles: shuffleGameTiles() });
+							},
+						},
 					]}
 				/>
 			) : (
@@ -68,7 +97,7 @@ const Game = () => {
 				</div>
 			)}
 
-			<Stats context={game.context} />
+			<Stats context={game.context} tiles={gameMode.tiles} />
 		</Layout>
 	);
 };

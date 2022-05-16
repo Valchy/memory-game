@@ -13,7 +13,7 @@ interface GameMenuProps {
 
 const GameMenu = () => {
 	return (
-		<Layout key="menu">
+		<Layout>
 			<motion.h2 animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="mb-4">
 				Please choose a game mode
 			</motion.h2>
