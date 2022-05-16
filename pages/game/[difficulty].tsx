@@ -20,16 +20,17 @@ const gameMode = {
 
 const Game = () => {
 	const [game, send] = useMachine(memoryGameMachine);
+	const shuffleGameTiles = (): TileType[] => {
+		return Array.from({ length: gameMode.tiles }, (elm, index) => ({
+			value: Math.floor(index / 2),
+			guessed: false,
+			active: false,
+		})).sort(() => Math.random() - 0.5);
+	};
 
 	useEffect(() => {
 		(() => {
-			let tiles: TileType[] = Array.from({ length: gameMode.tiles }, (elm, index) => ({
-				number: Math.floor(index / 2),
-				guessed: false,
-				active: false,
-			})).sort(() => Math.random() - 0.5);
-
-			send({ type: 'START_GAME', tiles });
+			send({ type: 'START_GAME', tiles: shuffleGameTiles() });
 		})();
 	}, [send]);
 
@@ -56,7 +57,7 @@ const Game = () => {
 				<Buttons
 					arr={[
 						{ href: '/', text: 'Change difficulty' },
-						{ href: '#', text: 'Play again' },
+						{ href: '#', text: 'Play again', event: () => send({ type: 'PLAY_AGAIN', tiles: shuffleGameTiles() }) },
 					]}
 				/>
 			) : (
@@ -102,7 +103,7 @@ const Tile = memo(({ tile, index, toggleTile }: TileProps) => {
 			<AnimatePresence>
 				{(tile.active || tile.guessed) && (
 					<motion.div variants={animations} animate="show" exit="hide">
-						{tile.number}
+						{tile.value}
 					</motion.div>
 				)}
 				{tile.active || (

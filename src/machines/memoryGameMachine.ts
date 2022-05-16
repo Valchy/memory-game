@@ -171,8 +171,8 @@ const memoryGameMachine = createMachine<Context>(
 				if (context.first_selected_tile === null || context.second_selected_tile === null) return false;
 
 				// Get tile values for comparison
-				let firstTileVal = context.tiles[context.first_selected_tile];
-				let secondTileVal = context.tiles[context.second_selected_tile];
+				let firstTileVal = context.tiles[context.first_selected_tile].value;
+				let secondTileVal = context.tiles[context.second_selected_tile].value;
 
 				// Error handling for game end and correct guess
 				if (cond.checkForMatch && firstTileVal != secondTileVal) return false;

@@ -3,7 +3,7 @@ export type FIX_ME_PLS = any;
 export type TileType = {
 	guessed: boolean;
 	active: boolean;
-	number: number;
+	value: number;
 };
 
 export type GameMode = {
