@@ -1,7 +1,14 @@
 import { createMachine, assign } from 'xstate';
 import type { Context, FIX_ME_PLS } from '@mytypes';
 
-const isActive = (context: Context, event: FIX_ME_PLS) => context.tiles[event.index].active || context.tiles[event.index].guessed;
+// Check if tile is active or guessed (aka opened)
+const isActive = (context: Context, event: FIX_ME_PLS): boolean => context.tiles[event.index].active || context.tiles[event.index].guessed;
+
+// Check if a correct guess was made
+const isCorrectGuess = (context: Context): boolean => {
+	if (context.first_selected_tile === null || context.second_selected_tile === null) return false;
+	return context.tiles[context.first_selected_tile].value == context.tiles[context.second_selected_tile].value;
+};
 
 const memoryGameMachine = createMachine<Context>(
 	{
@@ -67,24 +74,14 @@ const memoryGameMachine = createMachine<Context>(
 						{
 							cond: {
 								type: 'shouldGuess',
-								checkForMatch: true,
 								checkForLastPair: true,
 							},
-							actions: ['DO_GUESS', 'CORRECT_GUES'],
+							actions: 'DO_GUESS',
 							target: 'game_over',
 						},
 						{
 							cond: {
 								type: 'shouldGuess',
-								checkForMatch: true,
-								checkForLastPair: false,
-							},
-							actions: ['DO_GUESS', 'CORRECT_GUESS'],
-						},
-						{
-							cond: {
-								type: 'shouldGuess',
-								checkForMatch: false,
 								checkForLastPair: false,
 							},
 							actions: 'DO_GUESS',
@@ -122,42 +119,25 @@ const memoryGameMachine = createMachine<Context>(
 				tiles: (context, event) => {
 					if (context.first_selected_tile === null || context.second_selected_tile === null) return context.tiles;
 					let shallowCopyContext = [...context.tiles];
+					let correctGuess = isCorrectGuess(context);
 
 					// Remove chosen tile active state
 					shallowCopyContext[context.first_selected_tile] = {
 						...shallowCopyContext[context.first_selected_tile],
-						active: false,
+						active: correctGuess,
+						guessed: correctGuess,
 					};
 
 					// Remove compare tile active state
 					shallowCopyContext[context.second_selected_tile] = {
 						...shallowCopyContext[context.second_selected_tile],
-						active: false,
+						active: correctGuess,
+						guessed: correctGuess,
 					};
 
 					return shallowCopyContext;
 				},
-			}),
-			CORRECT_GUESS: assign({
-				pairs_left: (context) => context.pairs_left - 1,
-				tiles: (context, event) => {
-					if (context.first_selected_tile === null || context.second_selected_tile === null) return context.tiles;
-					let shallowCopyContext = [...context.tiles];
-
-					// Make chosen tile to guessed state
-					shallowCopyContext[context.first_selected_tile] = {
-						...shallowCopyContext[context.first_selected_tile],
-						guessed: !shallowCopyContext[context.first_selected_tile].guessed,
-					};
-
-					// Make compare tile to guessed state
-					shallowCopyContext[context.second_selected_tile] = {
-						...shallowCopyContext[context.second_selected_tile],
-						guessed: !shallowCopyContext[context.second_selected_tile].guessed,
-					};
-
-					return shallowCopyContext;
-				},
+				pairs_left: (context) => (isCorrectGuess(context) ? context.pairs_left - 1 : context.pairs_left),
 			}),
 			LOAD_GAME: assign({
 				tiles: (context, event) => event.tiles,
@@ -170,12 +150,7 @@ const memoryGameMachine = createMachine<Context>(
 				// Make sure both tiles have an index in them
 				if (context.first_selected_tile === null || context.second_selected_tile === null) return false;
 
-				// Get tile values for comparison
-				let firstTileVal = context.tiles[context.first_selected_tile].value;
-				let secondTileVal = context.tiles[context.second_selected_tile].value;
-
-				// Error handling for game end and correct guess
-				if (cond.checkForMatch && firstTileVal != secondTileVal) return false;
+				// Error handling for game end
 				if (cond.checkForLastPair && context.pairs_left != 1) return false;
 
 				console.log('Guess allowed', cond.checkForMatch, context);

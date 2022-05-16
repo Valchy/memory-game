@@ -22,3 +22,9 @@ export interface Context {
 	second_selected_tile: number | null;
 	is_first_pick: boolean;
 }
+
+export interface TileProps {
+	tile: TileType;
+	index: number;
+	toggleTile: (index: number) => void;
+}

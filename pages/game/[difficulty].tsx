@@ -6,7 +6,7 @@ import { gql } from '@apollo/client';
 import client from '@utils/graphql/client';
 import Layout from '@components/Layout';
 import { motion, AnimatePresence } from 'framer-motion';
-import type { TileType } from '@mytypes';
+import type { TileType, TileProps } from '@mytypes';
 import Buttons from '@components/Buttons';
 import Stats from '@components/Stats';
 
@@ -73,12 +73,6 @@ const Game = () => {
 	);
 };
 
-interface TileProps {
-	tile: TileType;
-	index: number;
-	toggleTile: (index: number) => void;
-}
-
 const Tile = memo(({ tile, index, toggleTile }: TileProps) => {
 	const animations = {
 		spin: {
@@ -95,7 +89,7 @@ const Tile = memo(({ tile, index, toggleTile }: TileProps) => {
 	return (
 		<motion.div
 			variants={animations}
-			animate={tile.active ? 'spin' : 'close'}
+			animate={tile.active || tile.guessed ? 'spin' : 'close'}
 			transition={{ duration: 0.5 }}
 			onClick={() => toggleTile(index)}
 			className="m-2 flex h-16 w-16 cursor-pointer select-none items-center justify-center rounded bg-[#181818] p-4 text-3xl font-bold text-[#404040]"
