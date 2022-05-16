@@ -5,7 +5,7 @@ interface Context {
 	game_time: number;
 	guesses: number;
 	tiles: TileType[];
-	tiles_left: number;
+	pairs_left: number;
 	chosen_tile: number | null;
 	compare_tile: number | null;
 }
@@ -18,7 +18,7 @@ const memoryGameMachine = createMachine<Context>(
 			game_time: 0,
 			guesses: 0,
 			tiles: [],
-			tiles_left: 0,
+			pairs_left: 0,
 			chosen_tile: null,
 			compare_tile: null,
 		},
@@ -42,7 +42,7 @@ const memoryGameMachine = createMachine<Context>(
 				on: {
 					GUESS: [
 						{
-							cond: (context) => context.chosen_tile === context.compare_tile && context.tiles_left === 2,
+							cond: (context) => context.chosen_tile === context.compare_tile && context.pairs_left === 2,
 							actions: ['DO_GUESS', 'CORRECT_GUES'],
 							target: 'game_over',
 						},
@@ -51,6 +51,7 @@ const memoryGameMachine = createMachine<Context>(
 							actions: ['DO_GUESS', 'CORRECT_GUESS'],
 						},
 						{
+							cond: (context) => context.chosen_tile !== null && context.compare_tile !== null,
 							actions: 'DO_GUESS',
 						},
 					],
@@ -63,6 +64,14 @@ const memoryGameMachine = createMachine<Context>(
 									active: !shallowCopyContext[event.index].active,
 								};
 								return shallowCopyContext;
+							},
+							chosen_tile: (context, event) => {
+								if (context.chosen_tile !== null && context.chosen_tile !== event.index) return event.index;
+								else return context.chosen_tile;
+							},
+							compare_tile: (context, event) => {
+								if (context.compare_tile !== null && context.compare_tile !== event.index) return event.index;
+								else return context.compare_tile;
 							},
 						}),
 					},
@@ -89,7 +98,7 @@ const memoryGameMachine = createMachine<Context>(
 				game_time: (context) => 0,
 				guesses: (context) => 0,
 				tiles: (context) => [],
-				tiles_left: (context) => 0,
+				pairs_left: (context) => 0,
 			}),
 			DO_GUESS: assign({
 				chosen_tile: (context) => null,
@@ -97,10 +106,11 @@ const memoryGameMachine = createMachine<Context>(
 				guesses: (context) => context.guesses + 1,
 			}),
 			CORRECT_GUESS: assign({
-				tiles_left: (context) => context.tiles_left - 2,
+				pairs_left: (context) => context.pairs_left - 2,
 			}),
 			LOAD_GAME: assign({
 				tiles: (context, event) => event.tiles,
+				pairs_left: (context, event) => event.tiles.length / 2,
 			}),
 		},
 	}

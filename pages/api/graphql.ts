@@ -1,7 +1,7 @@
 import { ApolloServerPluginLandingPageGraphQLPlayground } from 'apollo-server-core';
 import type { NextApiRequest, NextApiResponse } from 'next';
 import { gql, ApolloServer } from 'apollo-server-micro';
-import gameModes from './gameModes';
+import gameModes from './game_modes';
 
 const typeDefs = gql`
 	type GameMode {
