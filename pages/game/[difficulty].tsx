@@ -5,6 +5,7 @@ import memoryGameMachine from 'src/machines/memoryGameMachine';
 import { gql } from '@apollo/client';
 import client from '@utils/graphql/client';
 import Layout from '@components/Layout';
+import QRCode from '@components/QRCode';
 import { motion, AnimatePresence } from 'framer-motion';
 import Buttons from '@components/Buttons';
 import Stats from '@components/Stats';
@@ -72,19 +73,22 @@ const Game = ({ gameMode }: GameProps) => {
 			</motion.div>
 
 			{game.matches('game_over') && gameOver ? (
-				<Buttons
-					arr={[
-						{ href: '/', text: 'Change difficulty' },
-						{
-							href: '#',
-							text: 'Play again',
-							event: () => {
-								setGameOver(false);
-								send({ type: 'PLAY_AGAIN', tiles: shuffleGameTiles() });
+				<>
+					<Buttons
+						arr={[
+							{ href: '/', text: 'Change difficulty' },
+							{
+								href: '#',
+								text: 'Play again',
+								event: () => {
+									setGameOver(false);
+									send({ type: 'PLAY_AGAIN', tiles: shuffleGameTiles() });
+								},
 							},
-						},
-					]}
-				/>
+						]}
+					/>
+					<QRCode text="Or share with your friends" />
+				</>
 			) : (
 				<div className="mt-3 grid" style={{ gridTemplateColumns: `repeat(${gameMode?.columns}, minmax(0, 1fr)` }}>
 					{game.context.tiles.map((tile, index) => (

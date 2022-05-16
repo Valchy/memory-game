@@ -3,8 +3,8 @@ import { gql } from '@apollo/client';
 import client from '@utils/graphql/client';
 import Layout from '@components/Layout';
 import Buttons from '@components/Buttons';
+import QRCode from '@components/QRCode';
 import { motion } from 'framer-motion';
-import QRCode from 'react-qr-code';
 import type { GameMode } from '@mytypes';
 
 interface GameMenuProps {
@@ -18,11 +18,7 @@ const GameMenu = ({ gameModes }: GameMenuProps) => {
 				Please choose a game mode
 			</motion.h2>
 			<Buttons arr={gameModes.map(({ difficulty, label }) => ({ href: `/game/${difficulty}`, text: label }))} />
-
-			<motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 1, duration: 0.5 }}>
-				<h2 className="my-4 text-center text-xl">Share with your friends</h2>
-				<QRCode value="https://memory.valchy.com" />
-			</motion.div>
+			<QRCode text="Share with your friends" />
 		</Layout>
 	);
 };
