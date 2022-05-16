@@ -14,7 +14,7 @@ interface GameMenuProps {
 const GameMenu = ({ gameModes }: GameMenuProps) => {
 	return (
 		<Layout>
-			<motion.h2 animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="mb-4">
+			<motion.h2 initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="mb-4">
 				Please choose a game mode
 			</motion.h2>
 			<Buttons arr={gameModes.map(({ difficulty, label }) => ({ href: `/game/${difficulty}`, text: label }))} />

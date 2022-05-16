@@ -62,6 +62,7 @@ const Game = ({ gameMode }: GameProps) => {
 				)}
 			</AnimatePresence>
 			<motion.div
+				initial={{ opacity: 0 }}
 				animate={{ opacity: 1 }}
 				exit={{ opacity: 0 }}
 				style={{ marginBottom: gameOver ? 48 : 16 }}
