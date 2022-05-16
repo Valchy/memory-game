@@ -7,6 +7,7 @@ import client from '@utils/graphql/client';
 import Layout from '@components/Layout';
 import { motion, AnimatePresence } from 'framer-motion';
 import type { TileType } from '@mytypes';
+import Buttons from '@components/Buttons';
 
 const gameMode = {
 	label: 'beginner freindly',
@@ -38,15 +39,24 @@ const Game = () => {
 
 	return (
 		<Layout key="game">
-			<span>
+			<motion.h2 style={{ marginBottom: game.matches('game_over') ? 48 : 16 }}>
 				mode: {gameMode.difficulty}, guesses: {game.context.guesses}, time: {game.context.game_time}
-			</span>
+			</motion.h2>
 
-			<div className="mt-3 grid" style={{ gridTemplateColumns: `repeat(${gameMode.columns}, minmax(0, 1fr)` }}>
-				{game.context.tiles.map((tile, index) => (
-					<Tile tile={tile} index={index} toggleTile={toggleTile} key={`memory-game-tile-${index}`} />
-				))}
-			</div>
+			{game.matches('game_over') ? (
+				<Buttons
+					arr={[
+						{ href: '/', text: 'Change difficulty' },
+						{ href: '#', text: 'Play again' },
+					]}
+				/>
+			) : (
+				<div className="mt-3 grid" style={{ gridTemplateColumns: `repeat(${gameMode.columns}, minmax(0, 1fr)` }}>
+					{game.context.tiles.map((tile, index) => (
+						<Tile tile={tile} index={index} toggleTile={toggleTile} key={`memory-game-tile-${index}`} />
+					))}
+				</div>
+			)}
 		</Layout>
 	);
 };
