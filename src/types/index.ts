@@ -10,3 +10,19 @@ export type GameMode = {
 	difficulty: string;
 	tiles: number;
 };
+
+export interface Context {
+	game_time: number;
+	guesses: number;
+	tiles: TileType[];
+	pairs_left: number;
+	chosen_tile: number | null;
+	compare_tile: number | null;
+}
+
+export type CorrectGuessType = {
+	cond: {
+		checkForMatch: boolean;
+		checkForLastPair: boolean;
+	};
+};

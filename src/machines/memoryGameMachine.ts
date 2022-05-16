@@ -1,14 +1,5 @@
 import { createMachine, assign } from 'xstate';
-import type { TileType } from '@mytypes';
-
-interface Context {
-	game_time: number;
-	guesses: number;
-	tiles: TileType[];
-	pairs_left: number;
-	chosen_tile: number | null;
-	compare_tile: number | null;
-}
+import type { Context, CorrectGuessType } from '@mytypes';
 
 const memoryGameMachine = createMachine<Context>(
 	{
@@ -40,41 +31,47 @@ const memoryGameMachine = createMachine<Context>(
 					},
 				},
 				on: {
-					GUESS: [
-						{
-							cond: (context) => context.chosen_tile === context.compare_tile && context.pairs_left === 2,
-							actions: ['DO_GUESS', 'CORRECT_GUES'],
-							target: 'game_over',
-						},
-						{
-							cond: (context) => context.chosen_tile === context.compare_tile,
-							actions: ['DO_GUESS', 'CORRECT_GUESS'],
-						},
-						{
-							cond: (context) => context.chosen_tile !== null && context.compare_tile !== null,
-							actions: 'DO_GUESS',
-						},
-					],
 					TOGGLE_TILE: {
 						actions: assign({
 							tiles: (context, event) => {
 								let shallowCopyContext = [...context.tiles];
+
 								shallowCopyContext[event.index] = {
 									...shallowCopyContext[event.index],
 									active: !shallowCopyContext[event.index].active,
 								};
+
 								return shallowCopyContext;
-							},
-							chosen_tile: (context, event) => {
-								if (context.chosen_tile !== null && context.chosen_tile !== event.index) return event.index;
-								else return context.chosen_tile;
-							},
-							compare_tile: (context, event) => {
-								if (context.compare_tile !== null && context.compare_tile !== event.index) return event.index;
-								else return context.compare_tile;
 							},
 						}),
 					},
+					GUESS: [
+						{
+							cond: {
+								type: 'correctGuess',
+								checkForMatch: true,
+								checkForLastPair: true,
+							},
+							actions: ['DO_GUESS', 'CORRECT_GUES'],
+							target: 'game_over',
+						},
+						{
+							cond: {
+								type: 'correctGuess',
+								checkForMatch: true,
+								checkForLastPair: false,
+							},
+							actions: ['DO_GUESS', 'CORRECT_GUESS'],
+						},
+						{
+							cond: {
+								type: 'correctGuess',
+								checkForMatch: false,
+								checkForLastPair: false,
+							},
+							actions: 'DO_GUESS',
+						},
+					],
 					INC_GAME_TIME: {
 						actions: assign({
 							game_time: (context) => context.game_time + 1,
@@ -106,12 +103,21 @@ const memoryGameMachine = createMachine<Context>(
 				guesses: (context) => context.guesses + 1,
 			}),
 			CORRECT_GUESS: assign({
-				pairs_left: (context) => context.pairs_left - 2,
+				pairs_left: (context) => context.pairs_left - 1,
 			}),
 			LOAD_GAME: assign({
 				tiles: (context, event) => event.tiles,
 				pairs_left: (context, event) => event.tiles.length / 2,
 			}),
+		},
+		guards: {
+			correctGuess: (context, event, { cond }: CorrectGuessType): boolean => {
+				console.log(context.chosen_tile, context.compare_tile);
+				if (cond.checkForMatch && context.chosen_tile != context.compare_tile) return false;
+				if (cond.checkForLastPair && context.pairs_left != 1) return false;
+
+				return context.chosen_tile !== null && context.compare_tile !== null && context.chosen_tile === context.compare_tile;
+			},
 		},
 	}
 );

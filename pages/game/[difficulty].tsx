@@ -8,17 +8,29 @@ import Layout from '@components/Layout';
 import { motion, AnimatePresence } from 'framer-motion';
 import type { TileType } from '@mytypes';
 import Buttons from '@components/Buttons';
+import Stats from '@components/Stats';
 
 const gameMode = {
 	label: 'beginner freindly',
 	difficulty: 'easy',
-	tiles: 36,
-	columns: 6,
+	tiles: 4,
+	columns: 2,
 	id: 1,
 };
 
 const Game = () => {
-	const [game, send] = useMachine(memoryGameMachine);
+	const [game, send] = useMachine(memoryGameMachine, {
+		// chosen_tile: (context, event) => {
+		// 	// if (context.tiles[event.index].active || context.tiles[event.index].guessed) return context.chosen_tile;
+		// 	console.log(context.chosen_tile === null && context.chosen_tile !== event.index);
+		// 	if (context.chosen_tile === null && context.chosen_tile !== event.index) return event.index;
+		// 	else return context.chosen_tile;
+		// },
+		// compare_tile: (context, event) => {
+		// 	if (context.compare_tile === null && context.compare_tile !== event.index) return event.index;
+		// 	else return context.compare_tile;
+		// },
+	});
 
 	useEffect(() => {
 		(() => {
@@ -39,9 +51,15 @@ const Game = () => {
 
 	return (
 		<Layout key="game">
-			<motion.h2 animate={{ opacity: 1 }} exit={{ opacity: 0 }} style={{ marginBottom: game.matches('game_over') ? 48 : 16 }}>
-				mode: {gameMode.difficulty}, guesses: {game.context.guesses}, time: {game.context.game_time}
-			</motion.h2>
+			<motion.div
+				animate={{ opacity: 1 }}
+				exit={{ opacity: 0 }}
+				style={{ marginBottom: game.matches('game_over') ? 48 : 16 }}
+				className="flex flex-col"
+			>
+				<motion.span>mode: {gameMode.difficulty}</motion.span>
+				<motion.span>mode: {gameMode.difficulty}</motion.span>
+			</motion.div>
 
 			{game.matches('game_over') ? (
 				<Buttons
@@ -57,6 +75,8 @@ const Game = () => {
 					))}
 				</div>
 			)}
+
+			<Stats context={game.context} />
 		</Layout>
 	);
 };
@@ -73,6 +93,7 @@ const Tile = memo(({ tile, index, toggleTile }: TileProps) => {
 	const animations = {
 		spin: {
 			rotate: 360,
+			border: '2px solid orange',
 		},
 		close: {
 			rotate: 0,
@@ -90,7 +111,7 @@ const Tile = memo(({ tile, index, toggleTile }: TileProps) => {
 			className="m-2 flex h-16 w-16 cursor-pointer select-none items-center justify-center rounded bg-[#181818] p-4 text-3xl font-bold text-[#404040]"
 		>
 			<AnimatePresence>
-				{tile.active && (
+				{(tile.active || tile.guessed) && (
 					<motion.div variants={animations} animate="show" exit="hide">
 						{tile.number}
 					</motion.div>
