@@ -5,17 +5,22 @@ import { gql, ApolloServer } from 'apollo-server-micro';
 const typeDefs = gql`
 	type GameStats {
 		gamesPlayed: Int
+		totalGuesses: Int
 	}
 
 	type Query {
 		gameStats: GameStats
 	}
+
+	type Subscription {
+		gameStats: GameStats
+	}
 `;
 
 const resolvers = {
-	Query: {
-		gameStats: () => {
-			return 1;
+	Subscription: {
+		gameStats: {
+			subscribe: () => 'hello',
 		},
 	},
 };

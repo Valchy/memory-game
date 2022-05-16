@@ -1,3 +1,4 @@
+import Link from 'next/link';
 import type { Context } from '@mytypes';
 
 interface StatsProps {
@@ -9,8 +10,12 @@ export default function Stats({ context, tiles }: StatsProps) {
 	return (
 		<div className="mt-8 text-center lg:text-left">
 			<div className="top-3 left-3 flex flex-col lg:fixed">
-				<h2 className="mb-3 text-xl">Global game stats:</h2>
+				<Link href="/">
+					<a>Back to menu</a>
+				</Link>
+				{/* <h2 className="mb-3 text-xl">Global game stats:</h2>
 				<span>Total played: 0</span>
+				<span>Total guesses: 0</span> */}
 			</div>
 
 			<div className="top-3 right-4 flex flex-col text-center lg:fixed lg:text-right">
