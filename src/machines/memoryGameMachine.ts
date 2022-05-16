@@ -35,6 +35,7 @@ const memoryGameMachine = createMachine<Context>(
 				},
 				on: {
 					TOGGLE_TILE: {
+						cond: 'isGuessing',
 						actions: assign({
 							tiles: (context, event) => {
 								if (isActive(context, event)) return context.tiles;
@@ -164,6 +165,7 @@ const memoryGameMachine = createMachine<Context>(
 			}),
 		},
 		guards: {
+			isGuessing: (context) => context.first_selected_tile === null || context.second_selected_tile === null,
 			shouldGuess: (context, event, { cond }: FIX_ME_PLS): boolean => {
 				// Make sure both tiles have an index in them
 				if (context.first_selected_tile === null || context.second_selected_tile === null) return false;
