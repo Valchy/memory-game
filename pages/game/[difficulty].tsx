@@ -36,13 +36,12 @@ const Game = () => {
 	};
 
 	useEffect(() => {
-		console.log(game.value);
 		if (game.value === 'game_over') {
 			setShowConfetti(true);
 			setTimeout(() => {
 				setGameOver(true);
 				setShowConfetti(false);
-			}, 2000);
+			}, 4000);
 		}
 	}, [game.value]);
 

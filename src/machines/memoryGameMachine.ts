@@ -27,7 +27,7 @@ const memoryGameMachine = createMachine<Context>(
 			idle: {
 				on: {
 					START_GAME: {
-						actions: 'LOAD_GAME',
+						actions: ['RESET_GAME', 'LOAD_GAME'],
 						target: 'playing',
 					},
 				},
@@ -153,7 +153,6 @@ const memoryGameMachine = createMachine<Context>(
 				// Error handling for game end
 				if (cond.checkForLastPair && context.pairs_left != 1) return false;
 
-				console.log('Guess allowed', cond.checkForMatch, context);
 				return true;
 			},
 		},
