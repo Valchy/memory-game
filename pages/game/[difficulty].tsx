@@ -39,7 +39,7 @@ const Game = () => {
 
 	return (
 		<Layout key="game">
-			<motion.h2 style={{ marginBottom: game.matches('game_over') ? 48 : 16 }}>
+			<motion.h2 animate={{ opacity: 1 }} exit={{ opacity: 0 }} style={{ marginBottom: game.matches('game_over') ? 48 : 16 }}>
 				mode: {gameMode.difficulty}, guesses: {game.context.guesses}, time: {game.context.game_time}
 			</motion.h2>
 

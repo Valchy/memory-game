@@ -1,8 +1,9 @@
 import type { AppProps } from 'next/app';
+import { AnimatePresence } from 'framer-motion';
 import Head from 'next/head';
 import '@styles/globals.css';
 
-export default function MyApp({ Component, pageProps }: AppProps) {
+export default function MyApp({ Component, pageProps, router }: AppProps) {
 	return (
 		<>
 			<Head>
@@ -24,7 +25,9 @@ export default function MyApp({ Component, pageProps }: AppProps) {
 				<meta name="twitter:card" content="summary_large_image" />
 				<meta name="twitter:description" content="Fun memory game with three different difficulty levels" />
 			</Head>
-			<Component {...pageProps} />
+			<AnimatePresence exitBeforeEnter>
+				<Component key={router.asPath} {...pageProps} />
+			</AnimatePresence>
 		</>
 	);
 }

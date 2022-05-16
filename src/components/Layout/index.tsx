@@ -1,6 +1,5 @@
 import Header from '../Header';
 import { ReactNode } from 'react';
-import { AnimatePresence } from 'framer-motion';
 import Stats from '@components/Stats';
 
 interface LayoutProps {
@@ -12,7 +11,6 @@ export default function Layout({ children }: LayoutProps) {
 		<div className="flex flex-col items-center">
 			<Header />
 			<Stats />
-			{/* <AnimatePresence exitBeforeEnter>{children}</AnimatePresence> */}
 			{children}
 		</div>
 	);
