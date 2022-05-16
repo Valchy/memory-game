@@ -49,8 +49,10 @@ const Game = ({ gameMode }: GameProps) => {
 	}, [send]);
 
 	const toggleTile = useCallback((index: number): void => {
-		send({ type: 'TOGGLE_TILE', index });
-		setTimeout(() => send({ type: 'GUESS' }), 1500);
+		if (game.context.first_selected_tile === null || game.context.second_selected_tile === null) {
+			send({ type: 'TOGGLE_TILE', index });
+			setTimeout(() => send({ type: 'GUESS' }), 1500);
+		}
 	}, []);
 
 	return (
