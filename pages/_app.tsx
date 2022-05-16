@@ -1,5 +1,6 @@
 import type { AppProps } from 'next/app';
 import { AnimatePresence } from 'framer-motion';
+import DontLookHere from '@components/DontLookHere';
 import Head from 'next/head';
 import '@styles/globals.css';
 
@@ -27,6 +28,7 @@ export default function MyApp({ Component, pageProps, router }: AppProps) {
 			</Head>
 			<AnimatePresence exitBeforeEnter>
 				<Component key={router.asPath} {...pageProps} />
+				<DontLookHere />
 			</AnimatePresence>
 		</>
 	);
