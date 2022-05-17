@@ -11,20 +11,20 @@ export default function MyApp({ Component, pageProps, router }: AppProps) {
 				<meta charSet="utf-8" />
 				<meta httpEquiv="X-UA-Compatible" content="IE=edge,chrome=1" />
 				<meta name="HandheldFriendly" content="True" />
-				<title>Memory Game</title>
+				<title>Valchy Memory Game</title>
 				<link rel="icon" href="icon.png" />
 				<link rel="apple-touch-icon" href="icon.png" />
 
-				<meta name="description" content="Fun memory game with three different difficulty levels" />
+				<meta name="description" content="Fun memory game with three different difficulty levels and more!" />
 				<meta name="author" content="Valeri Sabev" />
 				<meta property="og:title" content="Valchy memory" />
 				<meta name="twitter:title" content="Valchy memory" />
 				<meta property="og:image" content="https://memory.valchy.com/icon.png" />
 				<meta property="og:image:alt" content="memory Logo" />
 				<meta name="twitter:image" content="https://memory.valchy.com/icon.png" />
-				<meta property="og:description" content="Fun memory game with three different difficulty levels" />
+				<meta property="og:description" content="Fun memory game with three different difficulty levels and more!" />
 				<meta name="twitter:card" content="summary_large_image" />
-				<meta name="twitter:description" content="Fun memory game with three different difficulty levels" />
+				<meta name="twitter:description" content="Fun memory game with three different difficulty levels and more!" />
 			</Head>
 			<AnimatePresence exitBeforeEnter>
 				<Component key={router.asPath} {...pageProps} />
